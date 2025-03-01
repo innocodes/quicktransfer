@@ -32,3 +32,38 @@ export const loginWithEmail = async ({email, password}: ILogin) => {
     throw error;
   }
 };
+
+// Check if user is logged in
+export const getCurrentUser = () => {
+    return new Promise((resolve, reject) => {
+      const unsubscribe = auth().onAuthStateChanged(async (user) => {
+        unsubscribe();
+        if (user) {
+          try {
+            // Get additional user data from Firestore
+            const userDoc = await firestore()
+              .collection('users')
+              .doc(user.uid)
+              .get();
+            
+            if (!userDoc.exists) {
+              resolve(null);
+              return;
+            }
+            
+            resolve({
+              uid: user.uid,
+              email: user.email,
+              name: userDoc.data()?.name,
+              phoneNumber: userDoc.data()?.phoneNumber,
+            });
+          } catch (error) {
+            reject(error);
+          }
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  };
+  
