@@ -45,12 +45,12 @@ export const getCurrentUser = () => {
               .collection('users')
               .doc(user.uid)
               .get();
-            
+
             if (!userDoc.exists) {
               resolve(null);
               return;
             }
-            
+
             resolve({
               uid: user.uid,
               email: user.email,
@@ -66,4 +66,15 @@ export const getCurrentUser = () => {
       });
     });
   };
-  
+
+// Sign out
+export const signOut = async () => {
+    try {
+      await auth().signOut();
+      return true;
+    } catch (error) {
+      console.error('Sign out error:', error);
+      throw error;
+    }
+  };
+
