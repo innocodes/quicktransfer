@@ -78,3 +78,16 @@ export const signOut = async () => {
     }
   };
 
+// Check if biometric auth is available
+export const updateLastLogin = async (userId: string) => {
+    try {
+      await firestore()
+        .collection('users')
+        .doc(userId)
+        .update({
+          lastLogin: firestore.FieldValue.serverTimestamp(),
+        });
+    } catch (error) {
+      console.error('Update last login error:', error);
+    }
+  };
