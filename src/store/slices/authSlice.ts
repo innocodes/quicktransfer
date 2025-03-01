@@ -1,121 +1,34 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { loginWithEmail, getCurrentUser, signOut, updateLastLogin } from '../../api/authService';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { persistReducer } from 'redux-persist';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type AuthLogin = {
-    email: string;
-    password: string;
-};
-
-  // Async thunk for login
-  export const login = createAsyncThunk(
-    'auth/login',
-    async ({ email, password }: AuthLogin, { rejectWithValue }) => {
-      try {
-        const user = await loginWithEmail({email, password});
-        await updateLastLogin(user.uid);
-        return user;
-      } catch (error: any) {
-        return rejectWithValue(error.message || 'Login failed');
-      }
-    }
-  );
-
-  // Async thunk for checking current user
-  export const checkAuth = createAsyncThunk(
-    'auth/checkAuth',
-    async (_, { rejectWithValue }) => {
-      try {
-        const user = await getCurrentUser();
-        if (user) {
-          await updateLastLogin(user?.uid);
-        }
-        return user;
-      } catch (error: any) {
-        return rejectWithValue(error.message || 'Authentication check failed');
-      }
-    }
-  );
-  
-// Async thunk for logout
-export const logout = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      await signOut();
-      return true;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Logout failed');
-    }
-  }
-);
-
-type ReduxState = {
-  user: null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  error: null;
+interface AuthState {
+  user: string | null;
 }
 
+const initialState: AuthState = {
+  user: null,
+};
 
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    isAuthenticated: false,
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {
-    clearError: (state) => {
-      state.error = null;
+    login: (state, action: PayloadAction<string>) => {
+      state.user = action.payload;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      // Login cases
-      .addCase(login.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.isAuthenticated = true;
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      // Check auth cases
-      .addCase(checkAuth.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(checkAuth.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.isAuthenticated = !!action.payload;
-      })
-      .addCase(checkAuth.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      // Logout cases
-      .addCase(logout.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(logout.fulfilled, (state) => {
-        state.loading = false;
-        state.user = null;
-        state.isAuthenticated = false;
-      })
-      .addCase(logout.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+    logout: (state) => {
+      state.user = null;
+    },
   },
 });
 
-export const { clearError } = authSlice.actions;
-export default authSlice.reducer;
+export const { login, logout } = authSlice.actions;
+
+// Persist Config
+const persistConfig = {
+  key: 'auth',
+  storage: AsyncStorage,
+};
+
+export default persistReducer(persistConfig, authSlice.reducer);

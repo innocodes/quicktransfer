@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
-  ActivityIndicator,
   Image,
   Alert,
 } from 'react-native';
@@ -16,35 +15,44 @@ import {login} from '../../store/slices/authSlice';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import {
+  createBiometricKey,
+  saveCredentials,
+  getCredentials,
   checkBiometricAvailability,
-  authenticateWithBiometrics,
 } from '../../utils/biometrics';
 import colors from '../../theme/colors';
+import {ArrowIcon, LockIcon, MailIcon} from '../../components/common/Icons';
 
 const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
 
+  const [emailError, setEmailError] = useState('');
   const dispatch = useDispatch();
   const {user, loading, error} = useSelector(state => state.auth);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const checkBiometrics = async () => {
-      const available = await checkBiometricAvailability();
+      const {available, biometricName} = await checkBiometricAvailability();
+
+      console.log('available value:', available);
+      console.log('biometric name:', biometricName);
       setBiometricsAvailable(available);
     };
 
     checkBiometrics();
   }, []);
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
-      return;
+  const validateEmail = (text: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(text)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
     }
-
-    dispatch(login({email, password}));
   };
 
   const handleBiometricLogin = async () => {
@@ -53,9 +61,28 @@ const LoginScreen = ({navigation}) => {
       if (credentials) {
         dispatch(login(credentials));
       }
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert('Biometric Authentication Failed', error.message);
     }
+  };
+
+  const handleSubmit = () => {
+    // if (!validateEmail(email)) {
+    //   return;
+    // }
+
+    if (!password) {
+      Alert.alert('Error', 'Please enter your password');
+      return;
+    }
+
+    setIsLoading(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      Alert.alert('Success', 'Login successful!');
+    }, 2000);
   };
 
   return (
@@ -64,11 +91,11 @@ const LoginScreen = ({navigation}) => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
       <View style={styles.logoContainer}>
-        <Image
+        {/* <Image
           source={require('../../assets/images/logo.png')}
           style={styles.logo}
           resizeMode="contain"
-        />
+        /> */}
         <Text style={styles.appName}>QuickPay</Text>
       </View>
 
@@ -82,30 +109,46 @@ const LoginScreen = ({navigation}) => {
       </View>
 
       <View style={styles.formContainer}>
+        {/* Basic email input with validation */}
         <Input
           label="Email"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text: string) => {
+            setEmail(text);
+            validateEmail(text);
+          }}
           placeholder="Enter your email"
           keyboardType="email-address"
-          autoCapitalize="none"
+          error={emailError}
+          leftComponent={<MailIcon />}
+          returnKeyType="next"
         />
 
+        {/* Password input with toggle visibility */}
         <Input
           label="Password"
           value={password}
           onChangeText={setPassword}
           placeholder="Enter your password"
-          secureTextEntry
+          secureTextEntry={true}
+          leftComponent={<LockIcon />}
+          returnKeyType="done"
         />
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
         <Button
-          title={loading ? 'Logging in...' : 'Login'}
-          onPress={handleLogin}
-          disabled={loading}
-          loading={loading}
+          title="Login"
+          type="primary"
+          onPress={handleSubmit}
+          loading={isLoading}
+          rightComponent={<ArrowIcon />}
+          disabled={!email || !password}
+          style={styles.loginButton}
+          leftComponent={undefined}
+          textStyle={undefined}
+          width={undefined}
+          testID={undefined}
         />
 
         {biometricsAvailable && (
@@ -160,7 +203,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: colors.textSecondary,
+    color: colors.secondary,
   },
   formContainer: {
     width: '100%',
@@ -176,6 +219,10 @@ const styles = StyleSheet.create({
   biometricsText: {
     color: colors.primary,
     fontSize: 16,
+  },
+  loginButton: {
+    flex: 1,
+    marginLeft: 8,
   },
 });
 

@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
-import {Ionicons} from '@expo/vector-icons'; // Assuming you're using Expo
+import {EyeIcon} from './Icons';
 
 const Input = ({
   label,
@@ -18,9 +18,9 @@ const Input = ({
   keyboardType = 'default',
   autoCapitalize = 'none',
   error,
-  leftIcon,
-  rightIcon,
-  onRightIconPress,
+  leftComponent,
+  rightComponent,
+  onRightComponentPress,
   maxLength,
   multiline = false,
   numberOfLines = 1,
@@ -33,7 +33,7 @@ const Input = ({
   onBlur,
   onFocus,
   testID,
-}) => {
+}: any) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
 
@@ -63,7 +63,9 @@ const Input = ({
           !editable && styles.disabledInput,
           style,
         ]}>
-        {leftIcon && <View style={styles.leftIconContainer}>{leftIcon}</View>}
+        {leftComponent && (
+          <View style={styles.leftComponentContainer}>{leftComponent}</View>
+        )}
 
         <TextInput
           style={[styles.input, multiline && styles.multilineInput]}
@@ -89,24 +91,20 @@ const Input = ({
 
         {secureTextEntry && (
           <TouchableOpacity
-            style={styles.rightIconContainer}
+            style={styles.rightComponentContainer}
             onPress={togglePasswordVisibility}
             activeOpacity={0.7}>
-            <Ionicons
-              name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
-              size={24}
-              color="#757575"
-            />
+            <EyeIcon visible={isPasswordVisible} />
           </TouchableOpacity>
         )}
 
-        {rightIcon && !secureTextEntry && (
+        {rightComponent && !secureTextEntry && (
           <TouchableOpacity
-            style={styles.rightIconContainer}
-            onPress={onRightIconPress}
+            style={styles.rightComponentContainer}
+            onPress={onRightComponentPress}
             activeOpacity={0.7}
-            disabled={!onRightIconPress}>
-            {rightIcon}
+            disabled={!onRightComponentPress}>
+            {rightComponent}
           </TouchableOpacity>
         )}
       </View>
@@ -159,10 +157,10 @@ const styles = StyleSheet.create({
     minHeight: 80,
     paddingTop: 12,
   },
-  leftIconContainer: {
+  leftComponentContainer: {
     marginRight: 10,
   },
-  rightIconContainer: {
+  rightComponentContainer: {
     marginLeft: 10,
     padding: 4,
   },

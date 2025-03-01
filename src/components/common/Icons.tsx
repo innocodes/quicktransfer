@@ -144,3 +144,26 @@ export const EyeIcon = (visible: boolean) => (
     )}
   </View>
 );
+
+// Simple arrow icon for a button
+export const ArrowIcon = () => (
+  <View
+    style={{
+      width: 16,
+      height: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}>
+    <View
+      style={{
+        width: 8,
+        height: 8,
+        borderTopWidth: 2,
+        borderRightWidth: 2,
+        borderColor: '#FFFFFF',
+        transform: [{rotate: '45deg'}],
+        marginLeft: -2,
+      }}
+    />
+  </View>
+);
