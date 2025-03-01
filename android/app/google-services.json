@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "884724527884",
+    "project_id": "quicktransfer-afcf8",
+    "storage_bucket": "quicktransfer-afcf8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884724527884:android:865e4f303c7b38f5a9cf29",
+        "android_client_info": {
+          "package_name": "com.quicktransfer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW6NBS-AsFk3qFW8LDEXXF0H5hhUNNF9E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
