@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { loginWithEmail, getCurrentUser, signOut, updateLastLogin } from './../api/authService';
+import { loginWithEmail, getCurrentUser, signOut, updateLastLogin } from '../../api/authService';
 
 type AuthLogin = {
     email: string;
