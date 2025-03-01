@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {login} from '../../store/slices/authSlice';
+import {setUser} from '../../store/slices/authSlice';
+import {signIn} from '../../services/authService';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import {
@@ -45,6 +47,16 @@ const LoginScreen = ({navigation}) => {
 
     checkBiometrics();
   }, []);
+
+  const handleLogin = async () => {
+    try {
+      const user = await signIn(email, password);
+      dispatch(setUser({uid: user.uid, email: user.email || '', fullName: ''}));
+      navigation.replace('Dashboard');
+    } catch (error: any) {
+      Alert.alert('Login Failed', error.message);
+    }
+  };
 
   const validateEmail = (text: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -96,14 +108,14 @@ const LoginScreen = ({navigation}) => {
           style={styles.logo}
           resizeMode="contain"
         /> */}
-        <Text style={styles.appName}>QuickPay</Text>
+        <Text style={styles.appName}>QuickTransfer</Text>
       </View>
 
       <View style={styles.welcomeContainer}>
         {user?.name ? (
           <Text style={styles.welcomeBack}>Welcome back, {user.name}!</Text>
         ) : (
-          <Text style={styles.welcomeText}>Welcome to QuickPay</Text>
+          <Text style={styles.welcomeText}>Welcome to QuickTransfer</Text>
         )}
         <Text style={styles.subtitle}>Fast, secure banking on the go</Text>
       </View>
@@ -140,15 +152,15 @@ const LoginScreen = ({navigation}) => {
         <Button
           title="Login"
           type="primary"
-          onPress={handleSubmit}
+          onPress={handleLogin}
           loading={isLoading}
           rightComponent={<ArrowIcon />}
           disabled={!email || !password}
           style={styles.loginButton}
-          leftComponent={undefined}
-          textStyle={undefined}
-          width={undefined}
-          testID={undefined}
+          //   leftComponent={undefined}
+          //   textStyle={undefined}
+          //   width={'90%'}
+          //   testID={undefined}
         />
 
         {biometricsAvailable && (
@@ -203,7 +215,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: colors.secondary,
+    color: colors.primary,
   },
   formContainer: {
     width: '100%',

@@ -7,6 +7,7 @@ import {
   View,
   Platform,
 } from 'react-native';
+import colors from '../../theme/colors';
 
 const Button = ({
   title = '',
@@ -68,7 +69,8 @@ const Button = ({
 
   return (
     <TouchableOpacity
-      style={getButtonStyles()}
+      //   style={getButtonStyles()}
+      style={[styles.button, styles.primaryButton]}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
@@ -99,13 +101,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
+    height: 45,
   },
 
   // Button types
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderWidth: 0,
+    height: 45,
   },
   secondaryButton: {
     backgroundColor: 'transparent',

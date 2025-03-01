@@ -14,6 +14,7 @@ const colors = {
     warning: '#f39c12',
     error: '#e74c3c',
     info: '#3498db',
+    blue: '#007AFF',
   };
 
   export default colors;
