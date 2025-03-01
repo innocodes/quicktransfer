@@ -78,7 +78,7 @@ export const signOut = async () => {
     }
   };
 
-// Check if biometric auth is available
+// Update last login time
 export const updateLastLogin = async (userId: string) => {
     try {
       await firestore()
