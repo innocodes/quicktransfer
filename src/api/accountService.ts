@@ -25,7 +25,7 @@ export const getAccountsWithRealtime = ({userId, callback}: IGetAccounts) => {
         (snapshot) => {
           const accounts = snapshot.docs.map(doc => ({
             id: doc.id,
-            ...doc.data()
+            ...doc.data(),
           }));
           callback(accounts);
         },
@@ -35,7 +35,7 @@ export const getAccountsWithRealtime = ({userId, callback}: IGetAccounts) => {
         }
       );
   };
-  
+
   // Get transactions for an account with real-time updates
 export const getTransactionsWithRealtime = ({accountId, callback}: IGetTransactionns) => {
     return firestore()
@@ -47,7 +47,7 @@ export const getTransactionsWithRealtime = ({accountId, callback}: IGetTransacti
         (snapshot) => {
           const transactions = snapshot.docs.map(doc => ({
             id: doc.id,
-            ...doc.data()
+            ...doc.data(),
           }));
           callback(transactions);
         },
@@ -57,4 +57,25 @@ export const getTransactionsWithRealtime = ({accountId, callback}: IGetTransacti
         }
       );
   };
-  
+
+  // Get account details by ID
+export const getAccountById = async (accountId: string) => {
+    try {
+      const doc = await firestore()
+        .collection('accounts')
+        .doc(accountId)
+        .get();
+
+      if (!doc.exists) {
+        throw new Error('Account not found');
+      }
+
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    } catch (error) {
+      console.error('Get account error:', error);
+      throw error;
+    }
+  };
