@@ -52,7 +52,13 @@ const LoginScreen = ({navigation}) => {
   const handleLogin = async () => {
     try {
       const user = await signIn(email, password);
-      dispatch(setUser({uid: user.uid, email: user.email || '', fullName: ''}));
+      dispatch(
+        setUser({
+          uid: user.uid,
+          email: user.email || '',
+          fullName: user.fullName,
+        }),
+      );
       navigation.replace('Dashboard');
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);

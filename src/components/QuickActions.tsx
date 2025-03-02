@@ -20,7 +20,7 @@ const QuickActions = () => {
       <TouchableOpacity
         style={styles.actionButton}
         onPress={() => navigation.navigate('Transactions')}>
-        <Text style={styles.actionText}>Transactions</Text>
+        <Text style={styles.actionText}>History</Text>
       </TouchableOpacity>
     </View>
   );

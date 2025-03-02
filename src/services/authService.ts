@@ -1,5 +1,5 @@
-import auth from "@react-native-firebase/auth";
-import firestore from "@react-native-firebase/firestore";
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 export const signUp = async (email: string, password: string, fullName: string) => {
   try {
@@ -7,7 +7,7 @@ export const signUp = async (email: string, password: string, fullName: string) 
     const user = userCredential.user;
 
     // Store user details in Firestore
-    await firestore().collection("users").doc(user.uid).set({
+    await firestore().collection('users').doc(user.uid).set({
       fullName,
       email,
       createdAt: new Date(),

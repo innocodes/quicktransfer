@@ -123,7 +123,7 @@ const SignUpScreen = ({navigation}) => {
           <View style={styles.innerContainer}>
             <Input
               label="Last Name"
-              value={firstName}
+              value={lastName}
               onChangeText={(text: string) => {
                 setLastName(text);
                 validateLastName(text);
@@ -163,7 +163,7 @@ const SignUpScreen = ({navigation}) => {
         />
 
         {/* Password input with toggle visibility */}
-        <Input
+        {/* <Input
           label="Confirm Password"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
@@ -171,7 +171,7 @@ const SignUpScreen = ({navigation}) => {
           secureTextEntry={true}
           leftComponent={<LockIcon />}
           returnKeyType="done"
-        />
+        /> */}
 
         <Button
           title="Sign Up"
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     alignSelf: 'center',
-    width: '90%',
+    width: '100%',
   },
   innerContainer: {
     width: '48%',

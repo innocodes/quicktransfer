@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
 import {useDispatch} from 'react-redux';
-import {logout} from '../store/slices/authSlice';
+import {logoutUser} from '../store/slices/authSlice';
 
 const DrawerContent = props => {
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ const DrawerContent = props => {
           onPress={() => props.navigation.navigate('Dashboard')}
         />
         <TouchableOpacity
-          onPress={() => dispatch(logout())}
+          onPress={() => dispatch(logoutUser())}
           style={styles.logoutBtn}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
