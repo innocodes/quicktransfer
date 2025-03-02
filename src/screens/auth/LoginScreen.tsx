@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Pressable,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {login} from '../../store/slices/authSlice';
@@ -56,6 +57,10 @@ const LoginScreen = ({navigation}) => {
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
     }
+  };
+
+  const goToSignUp = () => {
+    navigation.navigate('SignUp');
   };
 
   const validateEmail = (text: string) => {
@@ -163,6 +168,10 @@ const LoginScreen = ({navigation}) => {
           //   testID={undefined}
         />
 
+        <Pressable onPress={() => goToSignUp()} style={styles.signUpContainer}>
+          <Text style={styles.subtitle}>No account yet? Sign Up</Text>
+        </Pressable>
+
         {biometricsAvailable && (
           <TouchableOpacity
             style={styles.biometricsButton}
@@ -199,6 +208,11 @@ const styles = StyleSheet.create({
   welcomeContainer: {
     alignItems: 'center',
     marginTop: 30,
+    marginBottom: 30,
+  },
+  signUpContainer: {
+    alignItems: 'center',
+    marginTop: 10,
     marginBottom: 30,
   },
   welcomeBack: {
