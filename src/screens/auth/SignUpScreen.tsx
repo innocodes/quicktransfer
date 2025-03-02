@@ -35,11 +35,14 @@ const SignUpScreen = ({navigation}) => {
 
   const handleSignUp = async () => {
     try {
+      setIsLoading(true);
       await signUp(email, password, fullName);
       Alert.alert('Success', 'Account created!');
       navigation.navigate('Login');
     } catch (error: any) {
       Alert.alert('Error', error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -22,7 +22,27 @@ export const signUp = async (email: string, password: string, fullName: string) 
 export const signIn = async (email: string, password: string) => {
   try {
     const userCredential = await auth().signInWithEmailAndPassword(email, password);
-    return userCredential.user;
+    
+    const user = userCredential.user;
+
+    // Fetch fullName from Firestore
+    const userDoc = await firestore().collection('users').doc(user.uid).get();
+
+    if (userDoc.exists) {
+      const userData = userDoc.data();
+      console.log('userData', userData);
+      return {
+        uid: user.uid,
+        email: user.email,
+        fullName: userData?.fullName, // Retrieve fullName from Firestore
+        emailVerified: user.emailVerified,
+        photoURL: user.photoURL,
+        providerId: user.providerId,
+        metadata: user.metadata,
+      };
+    } else {
+      throw new Error('User data not found in Firestore.');
+    }
   } catch (error) {
     throw error;
   }

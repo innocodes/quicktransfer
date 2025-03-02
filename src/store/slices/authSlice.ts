@@ -30,10 +30,5 @@ const authSlice = createSlice({
 
 export const { setUser, logoutUser } = authSlice.actions;
 
-// Persist Config
-const persistConfig = {
-  key: 'auth',
-  storage: AsyncStorage,
-};
 
-export default persistReducer(persistConfig, authSlice.reducer);
+export default authSlice.reducer;

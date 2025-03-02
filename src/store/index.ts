@@ -10,7 +10,8 @@ import accountReducer from './slices/accountSlice';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'user', 'transaction', 'account'],
+  whitelist: ['auth', 'user'],
+  blacklist: ['auth.logoutUser'], // Prevent logout from clearing storage 
 };
 
 const rootReducer = combineReducers({

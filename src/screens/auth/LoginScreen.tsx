@@ -25,6 +25,9 @@ import {
 } from '../../utils/biometrics';
 import colors from '../../theme/colors';
 import {ArrowIcon, LockIcon, MailIcon} from '../../components/common/Icons';
+import store, {persistor, RootState} from '../../store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {setUserName} from '../../store/slices/userSlice';
 
 const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -33,9 +36,25 @@ const LoginScreen = ({navigation}) => {
 
   const [emailError, setEmailError] = useState('');
   const dispatch = useDispatch();
-  const {user, loading, error} = useSelector(state => state.auth);
+
+  const fullName = useSelector((state: RootState) => state.auth.user?.fullName);
+  const fullUser = useSelector((state: RootState) => state.auth.user);
+
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Subscribe to persistor to detect hydration completion
+    const unsubscribe = persistor.subscribe(() => {
+      if (persistor.getState().bootstrapped) {
+        setIsHydrated(true);
+        console.log('hydration completed');
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const checkBiometrics = async () => {
@@ -49,8 +68,22 @@ const LoginScreen = ({navigation}) => {
     checkBiometrics();
   }, []);
 
+  const [retrievedName, setRetrievedName] = useState('');
+
+  useEffect(() => {
+    setTimeout(() => {
+      console.log(
+        'Redux User after rehydration in login:',
+        store.getState().user.name,
+      );
+      setRetrievedName(store.getState().user.name);
+    }, 3000); // Delayed to ensure state is rehydrated
+  }, []);
+
   const handleLogin = async () => {
     try {
+      setIsLoading(true);
+
       const user = await signIn(email, password);
       dispatch(
         setUser({
@@ -59,11 +92,18 @@ const LoginScreen = ({navigation}) => {
           fullName: user.fullName,
         }),
       );
-      navigation.replace('Dashboard');
+      dispatch(setUserName(user.fullName));
+      persistor.flush(); // Ensures persist
+      console.log('user response', user);
+      navigation.navigate('Dashboard');
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // AsyncStorage.clear();
 
   const goToSignUp = () => {
     navigation.navigate('SignUp');
@@ -123,8 +163,8 @@ const LoginScreen = ({navigation}) => {
       </View>
 
       <View style={styles.welcomeContainer}>
-        {user?.name ? (
-          <Text style={styles.welcomeBack}>Welcome back, {user.name}!</Text>
+        {retrievedName ? (
+          <Text style={styles.welcomeBack}>Welcome back, {retrievedName}!</Text>
         ) : (
           <Text style={styles.welcomeText}>Welcome to QuickTransfer</Text>
         )}
@@ -158,7 +198,7 @@ const LoginScreen = ({navigation}) => {
           returnKeyType="done"
         />
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {/* {error && <Text style={styles.errorText}>{error}</Text>} */}
 
         <Button
           title="Login"
@@ -222,13 +262,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   welcomeBack: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 8,
   },
   welcomeText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 8,
