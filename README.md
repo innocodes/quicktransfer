@@ -1,97 +1,115 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Development Setup Guide
 
-# Getting Started
+## Prerequisites
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Ensure you have the following installed on your system:
 
-## Step 1: Start Metro
+- [Node.js](https://nodejs.org/) (Recommended: Latest LTS version)
+- [Yarn](https://yarnpkg.com/) or [npm](https://www.npmjs.com/)
+- [React Native CLI](https://reactnative.dev/docs/environment-setup) (for mobile development)
+- [Android Studio](https://developer.android.com/studio) (for Android development)
+- [Xcode](https://developer.apple.com/xcode/) (for iOS development, macOS only)
+- [Firebase CLI](https://firebase.google.com/docs/cli) (if Firebase is used)
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Installation
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+1. **Clone the repository:**
 
-```sh
-# Using npm
-npm start
+   ```sh
+   git clone https://github.com/innocodes/quicktransfer.git
+   cd project
+   ```
 
-# OR using Yarn
-yarn start
-```
+2. **Install dependencies:**
 
-## Step 2: Build and run your app
+   ```sh
+   yarn install  # or npm install
+   ```
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+3. **Skip environment variables setup:**
+   - Env was not used for ease of running the project on the interviewer's end.
+   - I understand that the Firebase API I used is publicly exposed. I permitted this to avoid any other person having to setup a firebase project before they can run this app. Once the interview process is done, I will switch the repo into Private mode or better still deactivate the public key.
 
-### Android
+## Running the Development Server
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+### For Web (Next.js)
 
 ```sh
-bundle install
+yarn dev  # or npm run dev
 ```
 
-Then, and every time you update your native dependencies, run:
+This will start the development server at `http://localhost:3000/`.
+
+### For React Native (Mobile App)
+
+#### Running on Android
 
 ```sh
-bundle exec pod install
+yarn android  # or npm run android
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Ensure you have an emulator running or a physical device connected.
+
+#### Running on iOS
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+yarn ios  # or npm run ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Only works on macOS with Xcode installed.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Firebase Setup (If Applicable) - Already done!
 
-## Step 3: Modify your app
+1. Add your `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) in the respective folders:
 
-Now that you have successfully run the app, let's make changes!
+   - `android/app/google-services.json`
+   - `ios/GoogleService-Info.plist`
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+2. Run Firebase authentication setup if needed.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Troubleshooting
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+- If dependencies fail to install, try running:
+  ```sh
+  yarn cache clean  # or npm cache clean --force
+  yarn install  # or npm install
+  ```
+- For Android issues, ensure your emulator/device is properly set up.
+- For iOS issues, try running:
+  ```sh
+  cd ios && pod install
+  cd ..
+  yarn ios
+  ```
 
-## Congratulations! :tada:
+## Backend Setup (Firebase)
 
-You've successfully run and modified your React Native App. :partying_face:
+1. Sign Up - Utilized Firebase createUserWithEmailAndPassword method:
 
-### Now what?
+   - `email`
+   - `password`
+   - `fullName`
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+2. Sign In - Utilized Firebase signInWithEmailAndPassword method.
 
-# Troubleshooting
+   - `email`
+   - `password`
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+3. Create Default Account - a default account is created for a new user during sign up.
 
-# Learn More
+   - `email`
+   - `password`
 
-To learn more about React Native, take a look at the following resources:
+4. 3. Add Accounts - Users can add new accounts on the Dashboard using the Add Account button
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+   - `bankName`
+   - `accountNumber`
+   - `balance`
+   - `type`
+
+## Contribution Guide
+
+- Create feature branches (`feature/your-feature-name`).
+- Submit PRs for review before merging into `main`.
+
+For any additional support, please check the project documentation or reach out to the team.
