@@ -175,8 +175,17 @@ const LoginScreen = ({navigation}) => {
       console.log('user response', user);
       navigation.navigate('Dashboard');
     } catch (error: any) {
-      console.log('error', error);
-      // Alert.alert('Login Failed', error.message);
+      console.log('error', error.message);
+      if (error.message.includes('invalid-credential')) {
+        console.log('yes, error');
+        Alert.alert(
+          'Login Failed',
+          'Wrong credentials, please try again with correct credentials.',
+        );
+      }
+      if (error.message.includes('unknown')) {
+        Alert.alert('Network Error', 'Please try again!');
+      }
     } finally {
       setIsLoading(false);
       setBioLogin(false);
