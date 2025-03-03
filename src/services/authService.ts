@@ -1,4 +1,4 @@
-import firestore from '@react-native-firebase/firestore';
+import firestore, { doc, getDoc, getFirestore } from '@react-native-firebase/firestore';
 import { fetchAccounts } from './accountService';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from '@react-native-firebase/auth';
 
@@ -52,30 +52,58 @@ export const signIn = async (email: string, password: string) => {
 
     const user = userCredential.user;
 
-    // Fetch fullName from Firestore
-    const userDoc = await firestore().collection('users').doc(user.uid).get();
+    const db = getFirestore(); // Initialize Firestore
+    const userRef = doc(db, 'users', user.uid); // Reference to Firestore document
+    const userDoc = await getDoc(userRef); // Fetch document
 
-    if (userDoc.exists) {
-      const userData = userDoc.data();
-
-      console.log('userData', userData);
-
-          // Fetch user accounts
-    const accounts = await fetchAccounts(user?.uid);
-
-      return {
-        uid: user.uid,
-        email: user.email,
-        fullName: userData?.fullName, // Retrieve fullName from Firestore
-        emailVerified: user.emailVerified,
-        photoURL: user.photoURL,
-        providerId: user.providerId,
-        metadata: user.metadata,
-        accounts,
-      };
-    } else {
+    if (!userDoc) {
       throw new Error('User data not found in Firestore.');
     }
+
+    const userData = userDoc.data();
+
+    console.log('userData', userData);
+
+    // Fetch user accounts
+    const accounts = await fetchAccounts(user?.uid);
+    
+    console.log('accounts here', accounts);
+
+    return {
+      uid: user.uid,
+      email: user.email,
+      fullName: userData?.fullName, // Retrieve fullName from Firestore
+      emailVerified: user.emailVerified,
+      photoURL: user.photoURL,
+      providerId: user.providerId,
+      metadata: user.metadata,
+      accounts,
+    };
+
+    // Fetch fullName from Firestore
+    // const userDoc = await firestore().collection('users').doc(user.uid).get();
+
+    // if (userDoc.exists) {
+    //   const userData = userDoc.data();
+
+    //   console.log('userData', userData);
+
+    //       // Fetch user accounts
+    // const accounts = await fetchAccounts(user?.uid);
+
+    //   return {
+    //     uid: user.uid,
+    //     email: user.email,
+    //     fullName: userData?.fullName, // Retrieve fullName from Firestore
+    //     emailVerified: user.emailVerified,
+    //     photoURL: user.photoURL,
+    //     providerId: user.providerId,
+    //     metadata: user.metadata,
+    //     accounts,
+    //   };
+    // } else {
+    //   throw new Error('User data not found in Firestore.');
+    // }
   } catch (error) {
     throw error;
   }
@@ -83,7 +111,8 @@ export const signIn = async (email: string, password: string) => {
 
 export const signOut = async () => {
   try {
-    await auth().signOut();
+    const auth = getAuth(); // ✅ Use getAuth()
+    await auth.signOut();
   } catch (error) {
     throw error;
   }

@@ -35,8 +35,11 @@ const accountSlice = createSlice({
     removeAccount: (state, action: PayloadAction<number>) => {
       state.accounts = state.accounts.filter((acc) => acc.id !== action.payload);
     },
+    clearAccounts: (state) => {
+      state.accounts = [];
+    },
   },
 });
 
-export const { setAccounts, addAccount, updateBalance, removeAccount } = accountSlice.actions;
+export const { setAccounts, addAccount, updateBalance, removeAccount, clearAccounts } = accountSlice.actions;
 export default accountSlice.reducer;

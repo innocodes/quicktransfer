@@ -3,6 +3,8 @@ import {View, Text, TouchableOpacity, StyleSheet, Animated} from 'react-native';
 import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
 import {useDispatch} from 'react-redux';
 import {logoutUser} from '../store/slices/authSlice';
+import {clearAccounts} from '../store/slices/accountSlice';
+import {signOut} from '../services/authService';
 
 // Custom Icons Components
 const DashboardIcon = () => (
@@ -180,6 +182,8 @@ const DrawerContent = props => {
         <TouchableOpacity
           onPress={() => {
             dispatch(logoutUser());
+            dispatch(clearAccounts());
+            signOut();
           }}
           style={styles.logoutBtn}>
           <LogoutIcon />

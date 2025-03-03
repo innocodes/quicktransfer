@@ -40,7 +40,10 @@ const SignUpScreen = ({navigation}) => {
       Alert.alert('Success', 'Account created!');
       navigation.navigate('Login');
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      // Alert.alert('Error', error.message);
+      if (error.message.includes('unknown')) {
+        Alert.alert('Network Error', 'Please try again!');
+      }
     } finally {
       setIsLoading(false);
     }

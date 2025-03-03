@@ -151,6 +151,8 @@ const LoginScreen = ({navigation}) => {
         }),
       );
 
+      dispatch(setAccounts(user?.accounts));
+
       await AsyncStorage.setItem('saved_email', finalEmail);
 
       // Check if biometrics was previously enabled
