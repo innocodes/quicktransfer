@@ -1,5 +1,6 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { fetchAccounts } from './accountService';
 
 export const signUp = async (email: string, password: string, fullName: string) => {
   try {
@@ -13,16 +14,37 @@ export const signUp = async (email: string, password: string, fullName: string) 
       createdAt: new Date(),
     });
 
-    return user;
+    // Create a default account for the new user
+    const defaultAccount = {
+      userId: user.uid,
+      bankName: 'Interswitch',
+      accountNumber: Math.floor(1000000000 + Math.random() * 9000000000).toString(), // Generate random 10-digit number
+      balance: 1000, // ₦1,000 initial balance
+      type: 'savings', // Default account type
+      createdAt: new Date(),
+    };
+
+    await firestore().collection('accounts').add(defaultAccount);
+
+    // Fetch the newly created account
+    const accounts = await fetchAccounts(user.uid);
+
+    return {
+      uid: user.uid,
+      email: user.email,
+      fullName,
+      accounts,
+    };
   } catch (error) {
     throw error;
   }
 };
 
+
 export const signIn = async (email: string, password: string) => {
   try {
     const userCredential = await auth().signInWithEmailAndPassword(email, password);
-    
+
     const user = userCredential.user;
 
     // Fetch fullName from Firestore
@@ -30,7 +52,12 @@ export const signIn = async (email: string, password: string) => {
 
     if (userDoc.exists) {
       const userData = userDoc.data();
+
       console.log('userData', userData);
+
+          // Fetch user accounts
+    const accounts = await fetchAccounts(user?.uid);
+
       return {
         uid: user.uid,
         email: user.email,
@@ -39,6 +66,7 @@ export const signIn = async (email: string, password: string) => {
         photoURL: user.photoURL,
         providerId: user.providerId,
         metadata: user.metadata,
+        accounts,
       };
     } else {
       throw new Error('User data not found in Firestore.');

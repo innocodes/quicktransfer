@@ -4,6 +4,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import DashboardScreen from './../screens/dashboard/DashboardScreen';
 import DrawerContent from '../components/DrawerContent';
 import LoginScreen from '../screens/auth/LoginScreen';
+import AddAccountScreen from '../screens/dashboard/AddAccountScreen';
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -17,6 +18,8 @@ const DrawerNavigator = () => (
       drawerStyle: {backgroundColor: '#fff', width: 250},
     }}>
     <Drawer.Screen name="Dashboard" component={DashboardScreen} />
+    <Drawer.Screen name="AddAccount" component={AddAccountScreen} />
+
     {/* <Drawer.Screen name="Profile" component={ProfileScreen} /> */}
   </Drawer.Navigator>
 );

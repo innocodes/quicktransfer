@@ -28,6 +28,7 @@ import {ArrowIcon, LockIcon, MailIcon} from '../../components/common/Icons';
 import store, {persistor, RootState} from '../../store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {setUserName} from '../../store/slices/userSlice';
+import {setAccounts} from '../../store/slices/accountSlice';
 
 const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -93,6 +94,7 @@ const LoginScreen = ({navigation}) => {
         }),
       );
       dispatch(setUserName(user.fullName));
+      dispatch(setAccounts(user.accounts));
       persistor.flush(); // Ensures persist
       console.log('user response', user);
       navigation.navigate('Dashboard');
