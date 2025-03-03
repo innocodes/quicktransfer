@@ -1,10 +1,14 @@
-import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { fetchAccounts } from './accountService';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from '@react-native-firebase/auth';
+
+
 
 export const signUp = async (email: string, password: string, fullName: string) => {
   try {
-    const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+    const auth = getAuth(); // ✅ Use getAuth()
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
     const user = userCredential.user;
 
     // Store user details in Firestore
@@ -43,7 +47,8 @@ export const signUp = async (email: string, password: string, fullName: string) 
 
 export const signIn = async (email: string, password: string) => {
   try {
-    const userCredential = await auth().signInWithEmailAndPassword(email, password);
+    const auth = getAuth(); // ✅ Use getAuth()
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
     const user = userCredential.user;
 

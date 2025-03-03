@@ -1,89 +1,45 @@
-import { Alert } from 'react-native';
-import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics';
+import ReactNativeBiometrics from 'react-native-biometrics';
 import * as Keychain from 'react-native-keychain';
 
-// Initialize the biometrics library
-const rnBiometrics = new ReactNativeBiometrics({
-    allowDeviceCredentials: true, // allows PIN/Pattern/Password as fallback
-});
+const rnBiometrics = new ReactNativeBiometrics();
 
-  // Function to check biometric availability
-  export const checkBiometricAvailability = async () => {
-    try {
-      const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+export const checkBiometricAvailability = async () => {
+  const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+  return { available, biometricName: biometryType };
+};
 
-      if (available) {
-        let biometricName = 'Biometrics';
-        if (biometryType === BiometryTypes.FaceID) {
-          biometricName = 'Face ID';
-        } else if (biometryType === BiometryTypes.TouchID) {
-          biometricName = 'Touch ID';
-        } else if (biometryType === BiometryTypes.Biometrics) {
-          biometricName = 'Fingerprint';
-        }
-
-
-        return {
-            available,
-            biometricName,
-          };
-        }
-    } catch (error) {
-      console.error('Error checking biometrics:', error);
-      Alert.alert('Error', 'Failed to check biometric availability');
-    }
-  };
-
-// Create a biometric key for the user
-export const createBiometricKey = async (userId: any) => {
-    try {
-      const { publicKey } = await rnBiometrics.createKeys();
-      if (publicKey) {
-        // You could store this public key to Firebase for verification
-        // This is a simple example - in production, you might want to verify this key
-        console.log('Biometric enrollment successful');
-
-        // Store a flag indicating biometrics is enabled for this user
-        await Keychain.setInternetCredentials(
-          'biometricsEnabled',
-          userId,
-          'true'
-        );
-      }
-    } catch (error) {
-      console.error('Error creating biometric key:', error);
-      Alert.alert('Error', 'Failed to enable biometric authentication');
-    }
-  };
-
-  type ILogin = {
-    email: string;
-    password: string;
+export const createBiometricKey = async () => {
+  const { keysExist } = await rnBiometrics.biometricKeysExist();
+  if (!keysExist) {
+    const { publicKey } = await rnBiometrics.createKeys();
+    return !!publicKey;
   }
+  return true;
+};
 
-// Save credentials to secure storage after successful login
-export const saveCredentials = async ({email, password}: ILogin) => {
-    try {
-      await Keychain.setGenericPassword(email, password);
-      return true;
-    } catch (error) {
-      console.error('Error saving credentials:', error);
-      return false;
-    }
-  };
+export const authenticateWithBiometrics = async () => {
+  try {
+    const result = await rnBiometrics.simplePrompt({
+      promptMessage: 'Confirm your identity',
+    });
 
-  export const getCredentials = async () => {
-    try {
-      const credentials = await Keychain.getGenericPassword();
-      if (credentials) {
-        return {
-          email: credentials.username,
-          password: credentials.password,
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error('Error retrieving credentials:', error);
-      return null;
+    if (result.success) {
+      return await getCredentials();
     }
-  };
+  } catch (error) {
+    throw new Error('Biometric authentication failed');
+  }
+  return null;
+};
+
+export const saveCredentials = async (email, password) => {
+  return Keychain.setGenericPassword(email, password, {
+    service: 'biometric_login',
+    accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
+};
+
+export const getCredentials = async () => {
+  const credentials = await Keychain.getGenericPassword({ service: 'biometric_login' });
+  return credentials ? { email: credentials.username, password: credentials.password } : null;
+};

@@ -22,6 +22,7 @@ import {
   saveCredentials,
   getCredentials,
   checkBiometricAvailability,
+  authenticateWithBiometrics,
 } from '../../utils/biometrics';
 import colors from '../../theme/colors';
 import {ArrowIcon, LockIcon, MailIcon} from '../../components/common/Icons';
@@ -34,6 +35,10 @@ const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+
+  const [bioEmail, setBioEmail] = useState('');
+  const [bioPassword, setBioPassword] = useState('');
+  const [bioLogin, setBioLogin] = useState(false);
 
   const [emailError, setEmailError] = useState('');
   const dispatch = useDispatch();
@@ -59,10 +64,7 @@ const LoginScreen = ({navigation}) => {
 
   useEffect(() => {
     const checkBiometrics = async () => {
-      const {available, biometricName} = await checkBiometricAvailability();
-
-      console.log('available value:', available);
-      console.log('biometric name:', biometricName);
+      const {available} = await checkBiometricAvailability();
       setBiometricsAvailable(available);
     };
 
@@ -78,14 +80,69 @@ const LoginScreen = ({navigation}) => {
         store.getState().user.name,
       );
       setRetrievedName(store.getState().user.name);
-    }, 3000); // Delayed to ensure state is rehydrated
+    }, 200); // Delayed to ensure state is rehydrated
   }, []);
 
-  const handleLogin = async () => {
+  const handleBiometricLogin = async () => {
     try {
+      console.log('step 1');
+      // Perform biometric authentication
+      const biometricsAuthentication = await authenticateWithBiometrics();
+      const {email, password} = biometricsAuthentication;
+      setBioEmail(email);
+      setBioPassword(password);
+
+      console.log(biometricsAuthentication, 'biometrics authentication');
+      if (!biometricsAuthentication) {
+        Alert.alert('Biometric Authentication Failed', 'Please try again.');
+        return;
+      }
+      console.log('step 2');
+      const storedEmail = await AsyncStorage.getItem('saved_email');
+      console.log('step 3', storedEmail);
+      if (!storedEmail) {
+        Alert.alert(
+          'Biometric Login',
+          'Please log in manually first to enable biometrics.',
+        );
+        return;
+      }
+
+      const credentials = await getCredentials();
+      console.log('step 4');
+      if (credentials) {
+        console.log('step 5');
+        setBioLogin(true);
+        setBioEmail(credentials.email);
+        setBioPassword(credentials.password);
+        // ✅ Pass credentials directly to handleLogin()
+        handleLogin(credentials.email, credentials.password);
+        handleLogin();
+      }
+    } catch (error) {
+      Alert.alert('Biometric Authentication Failed', error.message);
+    }
+  };
+
+  const handleLogin = async (loginEmail?: string, loginPassword?: string) => {
+    try {
+      console.log('step 6');
       setIsLoading(true);
 
-      const user = await signIn(email, password);
+      const finalEmail = loginEmail || email || bioEmail;
+      const finalPassword = loginPassword || password || bioPassword;
+
+      console.log('Using credentials:', finalEmail, finalPassword);
+
+      console.log('bioEmail:', bioEmail);
+      console.log('bioPassword:', bioPassword);
+
+      // if (!finalEmail || !finalPassword) {
+      //   throw new Error('Missing email or password');
+      // }
+
+      const user = await signIn(finalEmail, finalPassword);
+
       dispatch(
         setUser({
           uid: user.uid,
@@ -93,15 +150,36 @@ const LoginScreen = ({navigation}) => {
           fullName: user.fullName,
         }),
       );
+
+      await AsyncStorage.setItem('saved_email', finalEmail);
+
+      // Check if biometrics was previously enabled
+      const isBiometricEnabledBefore = await AsyncStorage.getItem(
+        'biometrics_enabled',
+      );
+
+      const biometricsEnabled = await createBiometricKey();
+      if (biometricsEnabled) {
+        await saveCredentials(finalEmail, finalPassword);
+
+        // Show success alert only if this is the first time enabling biometrics
+        if (!isBiometricEnabledBefore) {
+          Alert.alert('Success', 'Biometric login is now enabled.');
+          await AsyncStorage.setItem('biometrics_enabled', 'true'); // Mark as enabled
+        }
+      }
+
       dispatch(setUserName(user.fullName));
       dispatch(setAccounts(user.accounts));
       persistor.flush(); // Ensures persist
       console.log('user response', user);
       navigation.navigate('Dashboard');
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message);
+      console.log('error', error);
+      // Alert.alert('Login Failed', error.message);
     } finally {
       setIsLoading(false);
+      setBioLogin(false);
     }
   };
 
@@ -118,36 +196,6 @@ const LoginScreen = ({navigation}) => {
     } else {
       setEmailError('');
     }
-  };
-
-  const handleBiometricLogin = async () => {
-    try {
-      const credentials = await authenticateWithBiometrics();
-      if (credentials) {
-        dispatch(login(credentials));
-      }
-    } catch (error: any) {
-      Alert.alert('Biometric Authentication Failed', error.message);
-    }
-  };
-
-  const handleSubmit = () => {
-    // if (!validateEmail(email)) {
-    //   return;
-    // }
-
-    if (!password) {
-      Alert.alert('Error', 'Please enter your password');
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      Alert.alert('Success', 'Login successful!');
-    }, 2000);
   };
 
   return (
@@ -205,7 +253,7 @@ const LoginScreen = ({navigation}) => {
         <Button
           title="Login"
           type="primary"
-          onPress={handleLogin}
+          onPress={() => handleLogin()}
           loading={isLoading}
           rightComponent={<ArrowIcon />}
           disabled={!email || !password}
@@ -223,8 +271,8 @@ const LoginScreen = ({navigation}) => {
         {biometricsAvailable && (
           <TouchableOpacity
             style={styles.biometricsButton}
-            onPress={handleBiometricLogin}
-            disabled={loading}>
+            disabled={isLoading}
+            onPress={handleBiometricLogin}>
             <Text style={styles.biometricsText}>Login with Biometrics</Text>
           </TouchableOpacity>
         )}
